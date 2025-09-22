@@ -47,14 +47,35 @@ export function AuthProvider({ children }) {
 
   // PUBLIC_INTERFACE
   const signup = useCallback(async (email, password) => {
-    const { error, data } = await supabase.auth.signUp({
+    const { error: signUpError, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: process.env.REACT_APP_SITE_URL,
       },
     });
-    if (error) throw error;
+    if (signUpError) throw signUpError;
+    
+    // Create user profile if signup successful
+    if (data?.user) {
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user.id,
+          display_name: data.user.email?.split('@')[0] || 'Anonymous',
+          online_status: true,
+        });
+      
+      // If profile creation fails, we should handle it but not block auth
+      if (profileError) {
+        if (profileError.code === '23505') { // Duplicate key error
+          console.warn('User profile already exists');
+        } else {
+          console.error('Error creating user profile:', profileError);
+        }
+      }
+    }
+    
     return data;
   }, []);
 

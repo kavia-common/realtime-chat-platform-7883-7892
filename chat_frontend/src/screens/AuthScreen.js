@@ -24,11 +24,11 @@ export default function AuthScreen() {
           if (newUser?.identities?.length === 0) {
             // Email confirmation required
             setError('Please check your email for confirmation link');
-          } else {
-            setError('Account created successfully! You can now sign in.');
+          } else if (newUser) {
             setMode('signin');
             setEmail('');
             setPassword('');
+            setError('Account created successfully! Please sign in.');
           }
         }
       } catch (err) {
