@@ -55,8 +55,53 @@ Required environment variables:
 - `REACT_APP_SUPABASE_URL`: Supabase project URL
 - `REACT_APP_SUPABASE_KEY`: Supabase public anon key
 
+## Setup Instructions
+
+1. Create a new Supabase project at https://app.supabase.com
+2. Once created, get your project credentials:
+   - Project URL from: Settings -> API -> Project URL
+   - Anon/Public key from: Settings -> API -> anon/public key
+
+3. Configure environment variables:
+   Create a `.env` file in the root directory with:
+   ```
+   REACT_APP_SUPABASE_URL=your_project_url
+   REACT_APP_SUPABASE_KEY=your_anon_key
+   ```
+
+4. Configure Auth Settings in Supabase Dashboard:
+   - Go to Authentication -> URL Configuration
+   - Set Site URL to your production domain (e.g., https://yourdomain.com)
+   - Add redirect URLs:
+     * http://localhost:3000/** (for development)
+     * https://yourdomain.com/** (for production)
+
+5. Database Setup:
+   - Execute the SQL commands in the Database Schema section
+   - Enable Row Level Security (RLS)
+   - Apply the provided RLS policies
+
+6. Real-time Configuration:
+   - Enable real-time for the messages table in Database -> Replication
+   - Configure presence channels if not automatically enabled
+
 ## Client Setup
 The Supabase client is initialized in `src/supabaseClient.js` with:
 - Session persistence
 - Auto token refresh
 - URL detection for auth callbacks
+
+## Troubleshooting
+
+Common issues:
+1. **Connection Errors**: Verify your environment variables are correctly set
+2. **Auth Errors**: Check URL configuration in Supabase dashboard
+3. **Real-time Not Working**: Ensure table is enabled for real-time in Supabase dashboard
+4. **RLS Errors**: Verify policies are correctly set and user is authenticated
+
+## Security Notes
+
+1. Never commit your .env file or expose your Supabase keys
+2. Always use RLS policies to protect your data
+3. Use environment-specific keys for development and production
+4. Regularly rotate keys if compromised
