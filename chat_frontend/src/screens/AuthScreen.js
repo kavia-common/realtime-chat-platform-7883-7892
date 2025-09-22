@@ -21,9 +21,16 @@ export default function AuthScreen() {
           await signin(email, password);
         } else {
           const { user: newUser } = await signup(email, password);
-          if (newUser?.identities?.length === 0) {
+          if (!newUser) {
+            setError('Signup failed. Please try again.');
+          } else if (newUser?.identities?.length === 0) {
             // Email confirmation required
-            setError('Please check your email for confirmation link');
+            setError(
+              'Please check your email for the confirmation link. You will need to confirm your email before signing in.'
+            );
+            setMode('signin');
+            setEmail('');
+            setPassword('');
           } else if (newUser) {
             setMode('signin');
             setEmail('');

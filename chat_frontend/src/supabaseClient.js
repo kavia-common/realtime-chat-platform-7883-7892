@@ -31,6 +31,6 @@ export const supabase = createClient(supabaseUrl || '', supabaseKey || '', {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    redirectTo: process.env.REACT_APP_SITE_URL || window.location.origin,
+    redirectTo: process.env.REACT_APP_SITE_URL,
   },
 });

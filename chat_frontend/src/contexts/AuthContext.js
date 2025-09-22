@@ -47,6 +47,11 @@ export function AuthProvider({ children }) {
 
   // PUBLIC_INTERFACE
   const signup = useCallback(async (email, password) => {
+    // Verify SITE_URL is configured
+    if (!process.env.REACT_APP_SITE_URL) {
+      throw new Error('REACT_APP_SITE_URL environment variable is required for email confirmation');
+    }
+
     const { error: signUpError, data } = await supabase.auth.signUp({
       email,
       password,
@@ -54,7 +59,14 @@ export function AuthProvider({ children }) {
         emailRedirectTo: process.env.REACT_APP_SITE_URL,
       },
     });
-    if (signUpError) throw signUpError;
+    
+    if (signUpError) {
+      console.error('Signup error:', signUpError);
+      if (signUpError.message.includes('Email rate limit')) {
+        throw new Error('Too many signup attempts. Please try again later.');
+      }
+      throw signUpError;
+    }
     
     // Create user profile if signup successful
     if (data?.user) {
