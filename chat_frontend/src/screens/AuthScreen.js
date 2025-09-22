@@ -20,8 +20,16 @@ export default function AuthScreen() {
         if (mode === 'signin') {
           await signin(email, password);
         } else {
-          await signup(email, password);
-          // keep on same screen; Supabase may send confirmation email depending on project settings.
+          const { user: newUser } = await signup(email, password);
+          if (newUser?.identities?.length === 0) {
+            // Email confirmation required
+            setError('Please check your email for confirmation link');
+          } else {
+            setError('Account created successfully! You can now sign in.');
+            setMode('signin');
+            setEmail('');
+            setPassword('');
+          }
         }
       } catch (err) {
         setError(err?.message || 'Authentication failed');
