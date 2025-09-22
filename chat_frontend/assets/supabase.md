@@ -7,14 +7,43 @@ This document outlines the Supabase integration for the Ocean Chat application.
 
 ### Users Table
 ```sql
+-- Important: The column must be named 'online_status' (not 'online') to match frontend expectations
 create table public.users (
   id uuid references auth.users(id) primary key,
   display_name text,
   avatar_url text,
-  online_status boolean default false,
+  online_status boolean not null default false,  -- Required column name for presence tracking
   last_seen timestamp with time zone default timezone('utc'::text, now()),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- If you encounter PGRST204 error and have an 'online' column instead of 'online_status':
+-- Execute the following SQL to fix the schema:
+/*
+DO $$ 
+BEGIN 
+  -- Add online_status if it doesn't exist
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'users' 
+    AND column_name = 'online_status'
+  ) THEN
+    ALTER TABLE public.users ADD COLUMN online_status boolean NOT NULL DEFAULT false;
+  END IF;
+  
+  -- Migrate data from 'online' to 'online_status' if old column exists
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'users' 
+    AND column_name = 'online'
+  ) THEN
+    UPDATE public.users SET online_status = online;
+    ALTER TABLE public.users DROP COLUMN online;
+  END IF;
+END $$;
+*/
 
 -- Enable RLS
 alter table public.users enable row level security;
